@@ -61,7 +61,7 @@ public class PlayerContractService {
     @Autowired
     private DateUtil dateUtil;
 
-    public ResponseWithTotalPage<PlayerContractResponse> getAllPlayerContracts(int pageNo, int pageSize,UUID playerId,UUID clubId,Date start,Date end,Boolean includeEndedContracts){
+    public ResponseWithTotalPage<PlayerContractResponse> getAllPlayerContracts(int pageNo, int pageSize, UUID playerId, UUID clubId, String start, String end, String matchDate, Boolean includeEndedContracts){
         Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by(Sort.Direction.ASC, "id"));
         List<Specification<PlayerContract>> specificationList = new ArrayList<>();
         if(playerId != null){
@@ -74,19 +74,62 @@ public class PlayerContractService {
             PlayerContractSpecification specification = new PlayerContractSpecification(new SearchCriteria("club", SearchOperation.EQUALITY,club));
             specificationList.add(specification);
         }
-        if(includeEndedContracts){
-            if(start != null){
-                PlayerContractSpecification specification = new PlayerContractSpecification(new SearchCriteria("start", SearchOperation.GREATER_THAN,start));
-                specificationList.add(specification);
-            }
-            if(end != null){
-                PlayerContractSpecification specification = new PlayerContractSpecification(new SearchCriteria("end", SearchOperation.LESS_THAN,end));
-                specificationList.add(specification);
-            }
-        }else{
+        if(matchDate !=null){
+            String matchDateString = dateUtil.formatInputDate(matchDate);
+            Date matchDateParse=dateUtil.parseDateTime(matchDateString);
+            Timestamp matchDateTimestamp= new Timestamp(matchDateParse.getTime());
+            PlayerContractSpecification specificationStart = new PlayerContractSpecification(new SearchCriteria("start", SearchOperation.LESS_THAN_OR_EQUAL_DATE,matchDateTimestamp));
+            PlayerContractSpecification specificationEnd = new PlayerContractSpecification(new SearchCriteria("end", SearchOperation.GREATER_THAN_OR_EQUAL_DATE,matchDateTimestamp));
+            specificationList.add(specificationStart);
+            specificationList.add(specificationEnd);
+        }
+        if(start != null && end != null){
+            String startDateString = dateUtil.formatInputDate(start);
+            Date startDate=dateUtil.parseDateTime(startDateString);
+            String endDateString = dateUtil.formatInputDate(end);
+            Date endDate=dateUtil.parseDateTime(endDateString);
+            Timestamp timestampStart= new Timestamp(startDate.getTime());
+            Timestamp timestampEnd= new Timestamp(endDate.getTime());
+            PlayerContractSpecification specificationStart = new PlayerContractSpecification(new SearchCriteria("start", SearchOperation.GREATER_THAN_OR_EQUAL_DATE,timestampStart));
+            PlayerContractSpecification specificationEnd = new PlayerContractSpecification(new SearchCriteria("end", SearchOperation.GREATER_THAN_OR_EQUAL_DATE,timestampEnd));
+            specificationList.add(specificationStart);
+            specificationList.add(specificationEnd);
+        }
+        else if(start != null){
+            String startDateString = dateUtil.formatInputDate(start);
+            Date startDate=dateUtil.parseDateTime(startDateString);
             Date dateNow = new Date();
-            PlayerContractSpecification specification = new PlayerContractSpecification(new SearchCriteria("start", SearchOperation.GREATER_THAN,dateNow));
-            specificationList.add(specification);
+            Timestamp timestampStart= new Timestamp(startDate.getTime());
+            Timestamp timestampNow= new Timestamp(dateNow.getTime());
+            PlayerContractSpecification specificationStart = new PlayerContractSpecification(new SearchCriteria("start", SearchOperation.LESS_THAN_OR_EQUAL_DATE,timestampStart));
+            PlayerContractSpecification specificationEnd = new PlayerContractSpecification(new SearchCriteria("end", SearchOperation.GREATER_THAN_OR_EQUAL_DATE,timestampStart));
+            PlayerContractSpecification specificationNow = new PlayerContractSpecification(new SearchCriteria("end", SearchOperation.GREATER_THAN_OR_EQUAL_DATE,timestampNow));
+
+            specificationList.add(specificationStart);
+            specificationList.add(specificationEnd);
+            specificationList.add(specificationNow);
+
+        }
+        else if(end != null){
+            String endDateString = dateUtil.formatInputDate(end);
+            Date endDate=dateUtil.parseDateTime(endDateString);
+            Date dateNow = new Date();
+            Timestamp timestampEnd= new Timestamp(endDate.getTime());
+            Timestamp timestampNow= new Timestamp(dateNow.getTime());
+            PlayerContractSpecification specificationStart = new PlayerContractSpecification(new SearchCriteria("start", SearchOperation.LESS_THAN_OR_EQUAL_DATE,timestampEnd));
+            PlayerContractSpecification specificationEnd = new PlayerContractSpecification(new SearchCriteria("end", SearchOperation.GREATER_THAN_OR_EQUAL_DATE,timestampEnd));
+            PlayerContractSpecification specificationNow = new PlayerContractSpecification(new SearchCriteria("end", SearchOperation.GREATER_THAN_OR_EQUAL_DATE,timestampNow));
+
+            specificationList.add(specificationStart);
+            specificationList.add(specificationEnd);
+            specificationList.add(specificationNow);
+        }
+        else{
+            if(!includeEndedContracts){
+                Date dateNow = new Date();
+                PlayerContractSpecification specification = new PlayerContractSpecification(new SearchCriteria("start", SearchOperation.GREATER_THAN_DATE,dateNow));
+                specificationList.add(specification);
+            }
         }
 
         Page<PlayerContract> pageResult = playerContractRepository.findAll(Specification.allOf(specificationList),pageable);
@@ -128,7 +171,7 @@ public class PlayerContractService {
 //        df.setTimeZone(TimeZone.getTimeZone("UTC"));
         String dateStartString =dateUtil.formatDate(playerContractCreateDTO.getStart());
         String dateEndString = dateUtil.formatDate(playerContractCreateDTO.getEnd());
-        boolean numberValid = playerContractRepository.countAllByStartGreaterThanEqualAndEndLessThanEqual(dateStartString,dateEndString,playerContractCreateDTO.getNumber()) == 0;
+        boolean numberValid = playerContractRepository.countAllByClubAndByStartGreaterThanEqualAndEndLessThanEqual(dateStartString,dateEndString,playerContractCreateDTO.getNumber(),playerContractCreateDTO.getClubId()) == 0;
         if(!numberValid){
             throw new NotValidException(ValidationMessage.NUMBER_DUPLICATE_MESSAGE);
         }
@@ -187,7 +230,7 @@ public class PlayerContractService {
           if(!playerContractList.contains(playerContract)){
               throw new NotFoundException(PlayerContractFailMessage.PLAYER_CONTRACT_NOT_FOUND);
           }
-          boolean numberValid = playerContractRepository.countAllByStartGreaterThanEqualAndEndLessThanEqual(dateStartString,dateEndString,playerContractUpdateDTO.getNumber()) == 1;
+          boolean numberValid = playerContractRepository.countAllByClubAndByStartGreaterThanEqualAndEndLessThanEqual(dateStartString,dateEndString,playerContractUpdateDTO.getNumber(),playerContract.getClub().getId()) == 1;
           if(!numberValid){
               throw new NotValidException(ValidationMessage.NUMBER_DUPLICATE_MESSAGE);
           }

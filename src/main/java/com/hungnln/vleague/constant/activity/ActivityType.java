@@ -9,5 +9,22 @@ public enum ActivityType {
     Foul,
     Offside,
     KickOff,
-    Penalty
+    Penalty,
+    Corner,
+    ThrowIn,
+    Header,
+    BackHeel,
+    EndFirstHalf,
+    StartSecondHalf,
+    ExtraTime,
+    EndSecondHalf,
+    EndMatch;
+    public static ActivityType lookup(int input){
+        for (ActivityType type: values()){
+            if (type.ordinal() == input) {
+                return type;
+            }
+        }
+        throw new IllegalArgumentException("Invalid input: " + input);
+    }
 }

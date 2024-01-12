@@ -35,9 +35,9 @@ public class TournamentController {
     ResponseEntity<ResponseDTO<ResponseWithTotalPage<TournamentResponse>>> getAllTournaments(
             @RequestParam(defaultValue = "0") int pageIndex,
             @RequestParam(defaultValue = "10") int pageSize,
-            @RequestParam(required = false) Date name,
-            @RequestParam(required = false) Date start,
-            @RequestParam(required = false) Date end
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) String start,
+            @RequestParam(required = false) String end
             ){
         ResponseDTO<ResponseWithTotalPage<TournamentResponse>> responseDTO = new ResponseDTO<>();
         ResponseWithTotalPage<TournamentResponse> list = tournamentService.getAllTournaments(pageIndex, pageSize);

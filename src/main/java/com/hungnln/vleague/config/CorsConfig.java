@@ -8,6 +8,13 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
 public class CorsConfig {
+    private static final String[] AUTH_WHITELIST = {
+            "/authenticate",
+            "/swagger-resources/**",
+            "/swagger-ui/**",
+            "/v3/api-docs",
+            "/webjars/**"
+    };
     @Value("${allowed.origin}")
     private String allowedOrigin;
 

@@ -36,11 +36,11 @@ public class PlayerController {
     @GetMapping("")
     @Operation(summary ="Get players list", description = "Get players list")
     ResponseEntity<ResponseDTO<ResponseWithTotalPage<PlayerResponse>>> getAllPlayers(
-            @RequestParam(defaultValue = "0") int pageNo,
+            @RequestParam(defaultValue = "0") int pageIndex,
             @RequestParam(defaultValue = "20") int pageSize
     ){
         ResponseDTO<ResponseWithTotalPage<PlayerResponse>> responseDTO = new ResponseDTO<>();
-        ResponseWithTotalPage<PlayerResponse> list = playerService.getAllPlayers(pageNo, pageSize);
+        ResponseWithTotalPage<PlayerResponse> list = playerService.getAllPlayers(pageIndex, pageSize);
         responseDTO.setStatus(ResponseStatusDTO.SUCCESS);
         responseDTO.setData(list);
         responseDTO.setMessage(PlayerSuccessMessage.GET_PLAYER_SUCCESSFULL);

@@ -30,13 +30,13 @@ public interface PlayerContractRepository extends JpaRepository<PlayerContract, 
 //            "    OR p.end BETWEEN :start AND :end" +
 //            "    OR :start BETWEEN p.start AND p.end" +
 //            ")")
-    @Query(nativeQuery = true,value = "SELECT COUNT(*) FROM playercontracts p WHERE p.number = :number " +
+    @Query(nativeQuery = true,value = "SELECT COUNT(*) FROM playercontracts p WHERE p.clubId = :clubId AND p.number = :number " +
             "AND (" +
             "    (p.start BETWEEN :start AND :end" +
             "    OR p.end BETWEEN :start AND :end)" +
             "    OR (:start BETWEEN p.start AND p.end)" +
             ")")
-    int countAllByStartGreaterThanEqualAndEndLessThanEqual(@Param("start") String start, @Param("end") String end, @Param("number") int number);
+    int countAllByClubAndByStartGreaterThanEqualAndEndLessThanEqual(@Param("start") String start, @Param("end") String end, @Param("number") int number,@Param("clubId") UUID clubId);
 
 
 }

@@ -32,8 +32,8 @@ public class ValidationMessage {
     public static final String HOST_ID_VALID_MESSAGE = "Professor or Enterprise must be assigned";
     public static final String MANAGER_ID_VALID_MESSAGE = "Manager must be assigned";
     public static final String ENTERPRISE_ID_VALID_MESSAGE = "Enterprise must be assigned";
-    public static final String INTERVIEW_ID_VALID_MESSAGE = "Interview must be assigned";
-    public static final String RESULT_VALID_MESSAGE = "Result must be filled";
+    public static final String MINUTE_IN_MATCH_VALID_MESSAGE = "Minute in Match must be filled";
+    public static final String TYPE_VALID_MESSAGE = "Type must be filled";
     public static final String START_DATE_VALID_MESSAGE = "Start date must be filled";
     public static final String END_DATE_VALID_MESSAGE = "End date must be filled";
     public static final String DATE_FORM_MESSAGE = "Date must be in the format yyyy-MM-dd";

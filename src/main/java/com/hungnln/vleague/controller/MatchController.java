@@ -1,13 +1,12 @@
 package com.hungnln.vleague.controller;
 
+import com.hungnln.vleague.DTO.MatchActivityCreateDTO;
 import com.hungnln.vleague.DTO.MatchCreateDTO;
 import com.hungnln.vleague.DTO.MatchUpdateDTO;
 import com.hungnln.vleague.constant.response.ResponseStatusDTO;
 import com.hungnln.vleague.constant.match.MatchSuccessMessage;
 import com.hungnln.vleague.repository.MatchRepository;
-import com.hungnln.vleague.response.ResponseDTO;
-import com.hungnln.vleague.response.ResponseWithTotalPage;
-import com.hungnln.vleague.response.MatchResponse;
+import com.hungnln.vleague.response.*;
 import com.hungnln.vleague.service.MatchService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -84,6 +83,26 @@ public class MatchController {
         ResponseDTO<MatchResponse> responseDTO = new ResponseDTO<>();
         String msg = matchService.deleteMatchById(id);
         responseDTO.setMessage(msg);
+        responseDTO.setStatus(ResponseStatusDTO.SUCCESS);
+        return ResponseEntity.ok().body(responseDTO);
+    }
+    @PostMapping("/{id}/activities")
+    @Operation(summary ="Add match activities by id", description = "Add match activities by id")
+    ResponseEntity<ResponseDTO<MatchActivityResponse>> addMatchActivities(@PathVariable UUID id, @RequestBody @Valid MatchActivityCreateDTO dto) throws BindException{
+        ResponseDTO<MatchActivityResponse> responseDTO = new ResponseDTO<>();
+        MatchActivityResponse matchActivityResponse = matchService.addMatchActivity(id,dto);
+        responseDTO.setData(matchActivityResponse);
+        responseDTO.setMessage(MatchSuccessMessage.ADD_MATCH_ACTIVITY_SUCCESSFUL);
+        responseDTO.setStatus(ResponseStatusDTO.SUCCESS);
+        return ResponseEntity.ok().body(responseDTO);
+    }
+    @GetMapping("/{id}/participation")
+    @Operation(summary ="Get match participation by id", description = "Get match participation by id")
+    ResponseEntity<ResponseDTO<MatchParticipationResponse>> getMatchParticipation(@PathVariable UUID id){
+        ResponseDTO<MatchParticipationResponse> responseDTO = new ResponseDTO<>();
+        MatchParticipationResponse matchParticipationResponse = matchService.getMatchParticipationById(id);
+        responseDTO.setData(matchParticipationResponse);
+        responseDTO.setMessage(MatchSuccessMessage.GET_MATCH_SUCCESSFUL);
         responseDTO.setStatus(ResponseStatusDTO.SUCCESS);
         return ResponseEntity.ok().body(responseDTO);
     }
