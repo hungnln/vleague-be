@@ -30,10 +30,10 @@ public class PlayerUpdateDTO {
     @NotNull(message = ValidationMessage.DOB_VALID_MESSAGE)
     @Min(ValidationSize.HEIGHTCM_MIN)
     @Max(ValidationSize.HEIGHTCM_MAX)
-    private int heightCm;
+    private float heightCm;
 
     @Min(ValidationSize.WEIGHTKG_MIN)
     @Max(ValidationSize.WEIGHTKG_MAX)
     @NotNull(message = ValidationMessage.DOB_VALID_MESSAGE)
-    private int weightKg;
+    private float weightKg;
 }
