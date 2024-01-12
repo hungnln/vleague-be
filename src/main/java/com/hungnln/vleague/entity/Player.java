@@ -1,13 +1,10 @@
 package com.hungnln.vleague.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.io.Serializable;
-import java.util.Collection;
 import java.util.Date;
-import java.util.UUID;
 
 
 @Table(name="players")
@@ -20,7 +17,7 @@ import java.util.UUID;
 public class Player implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
+    private String id;
     private String name;
     private String imageURL;
     @Column(name = "dateofbirth")
@@ -29,7 +26,4 @@ public class Player implements Serializable {
     private float heightCm;
     @Column(name = "weightkg")
     private float weightKg;
-    @JsonIgnore
-    @ManyToMany(mappedBy = "players")
-    private Collection<News> news;
 }

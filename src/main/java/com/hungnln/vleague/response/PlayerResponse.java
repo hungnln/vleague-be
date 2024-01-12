@@ -8,14 +8,12 @@ import lombok.NoArgsConstructor;
 import lombok.ToString;
 
 import java.util.Date;
-import java.util.UUID;
-
 @Data
 @ToString
 @AllArgsConstructor
 @NoArgsConstructor
 public class PlayerResponse {
-    private UUID id;
+    private String id;
     private String name;
     private String imageURL;
     private Date dateOfBirth;

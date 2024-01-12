@@ -9,9 +9,6 @@ import com.hungnln.vleague.exceptions.ExistException;
 import com.hungnln.vleague.exceptions.ListEmptyException;
 import com.hungnln.vleague.exceptions.NotFoundException;
 import com.hungnln.vleague.repository.StaffRepository;
-import com.hungnln.vleague.response.PaginationResponse;
-import com.hungnln.vleague.response.PlayerResponse;
-import com.hungnln.vleague.response.ResponseWithTotalPage;
 import com.hungnln.vleague.response.StaffResponse;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -34,10 +31,9 @@ public class StaffService {
     private StaffRepository staffRepository;
     private final ModelMapper modelMapper;
 
-    public ResponseWithTotalPage<StaffResponse> getAllStaffs(int pageIndex, int pageSize){
-        Pageable pageable = PageRequest.of(pageIndex, pageSize, Sort.by(Sort.Direction.ASC, "id"));
+    public List<StaffResponse> getAllStaffs(int pageNo, int pageSize){
+        Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by(Sort.Direction.ASC, "id"));
         Page<Staff> pageResult = staffRepository.findAll(pageable);
-        ResponseWithTotalPage<StaffResponse> response = new ResponseWithTotalPage<>();
         List<StaffResponse> staffList = new ArrayList<>();
         if(pageResult.hasContent()) {
             for (Staff staff :
@@ -45,16 +41,10 @@ public class StaffService {
                 StaffResponse staffResponse = modelMapper.map(staff, StaffResponse.class);
                 staffList.add(staffResponse);
             }
-        }
-        response.setData(staffList);
-        PaginationResponse paginationResponse = PaginationResponse.builder()
-                .pageIndex(pageResult.getNumber())
-                .pageSize(pageResult.getSize())
-                .totalCount((int) pageResult.getTotalElements())
-                .totalPage(pageResult.getTotalPages())
-                .build();
-        response.setPagination(paginationResponse);
-        return response;
+
+        }else
+            throw new ListEmptyException(StaffFailMessage.LIST_STAFF_IS_EMPTY);
+        return staffList;
     }
 
     public StaffResponse addStaff(StaffCreateDTO staffCreateDTO) {

@@ -8,7 +8,6 @@ import com.hungnln.vleague.repository.RefereeRepository;
 import com.hungnln.vleague.response.ListResponseDTO;
 import com.hungnln.vleague.response.ResponseDTO;
 import com.hungnln.vleague.response.RefereeResponse;
-import com.hungnln.vleague.response.ResponseWithTotalPage;
 import com.hungnln.vleague.service.RefereeService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -22,7 +21,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/v1/referees")
+@RequestMapping("/api/v1.0/referees")
 @Tag(name = "referee", description = "referee api")
 public class RefereeController {
     @Autowired
@@ -31,19 +30,19 @@ public class RefereeController {
     RefereeService refereeService;
     @GetMapping("")
     @Operation(summary ="Get referees list", description = "Get referees list")
-    ResponseEntity<ResponseDTO<ResponseWithTotalPage<RefereeResponse>>> getAllReferees(
-            @RequestParam(defaultValue = "0") int pageIndex,
-            @RequestParam(defaultValue = "20") int pageSize
+    ResponseEntity<ListResponseDTO> getAllReferees(
+            @RequestParam(defaultValue = "0") int pageNo,
+            @RequestParam(defaultValue = "10") int pageSize
     ){
-        ResponseDTO<ResponseWithTotalPage<RefereeResponse>> responseDTO = new ResponseDTO<>();
-        ResponseWithTotalPage<RefereeResponse> list = refereeService.getAllReferees(pageIndex, pageSize);
+        ListResponseDTO<RefereeResponse> responseDTO = new ListResponseDTO<>();
+        List<RefereeResponse> list = refereeService.getAllReferees(pageNo, pageSize);
         responseDTO.setStatus(ResponseStatusDTO.SUCCESS);
         responseDTO.setData(list);
         responseDTO.setMessage(RefereeSuccessMessage.GET_ALL_SUCCESSFULL);
         return ResponseEntity.ok().body(responseDTO);
     }
     @GetMapping("/{id}")
-    ResponseEntity< ResponseDTO<RefereeResponse>> getRefereeById(@PathVariable UUID id){
+    ResponseEntity<ResponseDTO> getRefereeById(@PathVariable UUID id){
         ResponseDTO<RefereeResponse> responseDTO = new ResponseDTO<>();
         RefereeResponse referee = refereeService.getRefereeById(id);
         responseDTO.setData(referee);
@@ -52,7 +51,7 @@ public class RefereeController {
         return ResponseEntity.ok().body(responseDTO);
     }
     @PostMapping("")
-    ResponseEntity< ResponseDTO<RefereeResponse>> addReferee(@RequestBody @Valid RefereeCreateDTO dto) throws BindException {
+    ResponseEntity<ResponseDTO> addReferee(@RequestBody @Valid RefereeCreateDTO dto) throws BindException {
         ResponseDTO<RefereeResponse> responseDTO = new ResponseDTO<>();
         RefereeResponse referee = refereeService.addReferee(dto);
         responseDTO.setData(referee);
@@ -62,7 +61,7 @@ public class RefereeController {
     }
 
     @PutMapping("/{id}")
-    ResponseEntity< ResponseDTO<RefereeResponse>> updateReferee(@PathVariable UUID id, @RequestBody @Valid RefereeUpdateDTO dto) throws BindException{
+    ResponseEntity<ResponseDTO> updateReferee(@PathVariable UUID id, @RequestBody @Valid RefereeUpdateDTO dto) throws BindException{
         ResponseDTO<RefereeResponse> responseDTO = new ResponseDTO<>();
         RefereeResponse referee = refereeService.updateReferee(id,dto);
         responseDTO.setData(referee);
