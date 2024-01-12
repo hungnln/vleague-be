@@ -9,9 +9,6 @@ import com.hungnln.vleague.exceptions.ExistException;
 import com.hungnln.vleague.exceptions.ListEmptyException;
 import com.hungnln.vleague.exceptions.NotFoundException;
 import com.hungnln.vleague.repository.TournamentRepository;
-import com.hungnln.vleague.response.PaginationResponse;
-import com.hungnln.vleague.response.ResponseWithTotalPage;
-import com.hungnln.vleague.response.StaffResponse;
 import com.hungnln.vleague.response.TournamentResponse;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -33,10 +30,9 @@ public class TournamentService  {
     private TournamentRepository tournamentRepository;
     private final ModelMapper modelMapper;
 
-    public ResponseWithTotalPage<TournamentResponse> getAllTournaments(int pageNo, int pageSize){
+    public List<TournamentResponse> getAllTournaments(int pageNo, int pageSize){
         Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by(Sort.Direction.ASC, "id"));
         Page<Tournament> pageResult = tournamentRepository.findAll(pageable);
-        ResponseWithTotalPage<TournamentResponse> response = new ResponseWithTotalPage<>();
         List<TournamentResponse> tournamentList = new ArrayList<>();
         if(pageResult.hasContent()) {
             for (Tournament tournament :
@@ -45,16 +41,9 @@ public class TournamentService  {
                 tournamentList.add(tournamentResponse);
             }
 
-        }
-        response.setData(tournamentList);
-        PaginationResponse paginationResponse = PaginationResponse.builder()
-                .pageIndex(pageResult.getNumber())
-                .pageSize(pageResult.getSize())
-                .totalCount((int) pageResult.getTotalElements())
-                .totalPage(pageResult.getTotalPages())
-                .build();
-        response.setPagination(paginationResponse);
-        return response;
+        }else
+            throw new ListEmptyException(TournamentFailMessage.LIST_TOURNAMENT_IS_EMPTY);
+        return tournamentList;
     }
 
     public TournamentResponse addTournament(TournamentCreateDTO tournamentCreateDTO) {

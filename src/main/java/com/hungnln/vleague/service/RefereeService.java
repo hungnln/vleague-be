@@ -9,10 +9,7 @@ import com.hungnln.vleague.exceptions.ExistException;
 import com.hungnln.vleague.exceptions.ListEmptyException;
 import com.hungnln.vleague.exceptions.NotFoundException;
 import com.hungnln.vleague.repository.RefereeRepository;
-import com.hungnln.vleague.response.PaginationResponse;
 import com.hungnln.vleague.response.RefereeResponse;
-import com.hungnln.vleague.response.ResponseWithTotalPage;
-import com.hungnln.vleague.response.StaffResponse;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,10 +31,9 @@ public class RefereeService {
     private RefereeRepository refereeRepository;
     private final ModelMapper modelMapper;
 
-    public ResponseWithTotalPage<RefereeResponse> getAllReferees(int pageNo, int pageSize){
+    public List<RefereeResponse> getAllReferees(int pageNo, int pageSize){
         Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by(Sort.Direction.ASC, "id"));
         Page<Referee> pageResult = refereeRepository.findAll(pageable);
-        ResponseWithTotalPage<RefereeResponse> response = new ResponseWithTotalPage<>();
         List<RefereeResponse> refereeList = new ArrayList<>();
         if(pageResult.hasContent()) {
             for (Referee referee :
@@ -45,16 +41,10 @@ public class RefereeService {
                 RefereeResponse refereeResponse = modelMapper.map(referee, RefereeResponse.class);
                 refereeList.add(refereeResponse);
             }
-        }
-        response.setData(refereeList);
-        PaginationResponse paginationResponse = PaginationResponse.builder()
-                .pageIndex(pageResult.getNumber())
-                .pageSize(pageResult.getSize())
-                .totalCount((int) pageResult.getTotalElements())
-                .totalPage(pageResult.getTotalPages())
-                .build();
-        response.setPagination(paginationResponse);
-        return response;
+
+        }else
+            throw new ListEmptyException(RefereeFailMessage.LIST_REFEREE_IS_EMPTY);
+        return refereeList;
     }
 
     public RefereeResponse addReferee(RefereeCreateDTO refereeCreateDTO) {
