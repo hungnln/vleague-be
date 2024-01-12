@@ -1,14 +1,9 @@
 package com.hungnln.vleague.response;
 
-import com.hungnln.vleague.entity.Club;
-import com.hungnln.vleague.entity.Round;
-import com.hungnln.vleague.entity.Stadium;
-import com.hungnln.vleague.entity.Tournament;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import com.hungnln.vleague.entity.*;
+import lombok.*;
 
+import java.util.Collection;
 import java.util.Date;
 import java.util.UUID;
 
@@ -16,6 +11,7 @@ import java.util.UUID;
 @ToString
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 public class MatchResponse {
     private UUID id;
     private Date startDate;
@@ -28,4 +24,7 @@ public class MatchResponse {
     private Stadium stadium;
     private UUID roundId;
     private Round round;
+    private int homeGoals;
+    private int awayGoals;
+    private Collection<MatchActivity> activities;
 }

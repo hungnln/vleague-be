@@ -16,6 +16,7 @@ import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindException;
 import org.springframework.web.bind.annotation.*;
@@ -37,17 +38,18 @@ public class PlayerContractController {
     @GetMapping("")
     @Operation(summary ="Get players contract list", description = "Get players contract list")
     ResponseEntity<ResponseDTO<ResponseWithTotalPage<PlayerContractResponse>>> getAllPlayerContracts(
-            @RequestParam(defaultValue = "0") int pageNo,
+            @RequestParam(defaultValue = "0") int pageIndex,
             @RequestParam(defaultValue = "10") int pageSize,
             @RequestParam(required = false) UUID playerId,
             @RequestParam(required = false) UUID clubId,
-            @RequestParam(required = false) Date start,
-            @RequestParam(required = false) Date end,
+            @RequestParam(required = false) String start,
+            @RequestParam(required = false) String end,
+            @RequestParam(required = false) String matchDate,
             @RequestParam(defaultValue = "true") Boolean includeEndedContracts
 
     ){
         ResponseDTO<ResponseWithTotalPage<PlayerContractResponse>> responseDTO = new ResponseDTO<>();
-        ResponseWithTotalPage<PlayerContractResponse> list = playerContractService.getAllPlayerContracts(pageNo, pageSize,playerId,clubId,start,end,includeEndedContracts);
+        ResponseWithTotalPage<PlayerContractResponse> list = playerContractService.getAllPlayerContracts(pageIndex, pageSize,playerId,clubId,start,end,matchDate,includeEndedContracts);
         responseDTO.setStatus(ResponseStatusDTO.SUCCESS);
         responseDTO.setData(list);
         responseDTO.setMessage(PlayerContractSuccessMessage.GET_PLAYER_CONTRACT_SUCCESSFUL);

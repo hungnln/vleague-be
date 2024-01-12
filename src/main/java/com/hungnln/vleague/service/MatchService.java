@@ -1,7 +1,9 @@
 package com.hungnln.vleague.service;
 
+import com.hungnln.vleague.DTO.MatchActivityCreateDTO;
 import com.hungnln.vleague.DTO.MatchCreateDTO;
 import com.hungnln.vleague.DTO.MatchUpdateDTO;
+import com.hungnln.vleague.constant.activity.ActivityType;
 import com.hungnln.vleague.constant.club.ClubFailMessage;
 import com.hungnln.vleague.constant.match.MatchFailMessage;
 import com.hungnln.vleague.constant.match.MatchSuccessMessage;
@@ -9,6 +11,9 @@ import com.hungnln.vleague.constant.round.RoundFailMessage;
 import com.hungnln.vleague.constant.stadium.StadiumFailMessage;
 import com.hungnln.vleague.constant.tournament.TournamentFailMessage;
 import com.hungnln.vleague.entity.*;
+import com.hungnln.vleague.entity.key.PlayerMatchParticipationKey;
+import com.hungnln.vleague.entity.key.RefereeMatchParticipationKey;
+import com.hungnln.vleague.entity.key.StaffMatchParticipationKey;
 import com.hungnln.vleague.exceptions.ListEmptyException;
 import com.hungnln.vleague.exceptions.NotFoundException;
 import com.hungnln.vleague.helper.MatchSpecification;
@@ -16,9 +21,7 @@ import com.hungnln.vleague.helper.RoundSpecification;
 import com.hungnln.vleague.helper.SearchCriteria;
 import com.hungnln.vleague.helper.SearchOperation;
 import com.hungnln.vleague.repository.*;
-import com.hungnln.vleague.response.PaginationResponse;
-import com.hungnln.vleague.response.ResponseWithTotalPage;
-import com.hungnln.vleague.response.MatchResponse;
+import com.hungnln.vleague.response.*;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,6 +49,14 @@ public class MatchService {
     private StadiumRepository stadiumRepository;
     @Autowired
     private RoundRepository roundRepository;
+    @Autowired
+    private MatchActivityRepository matchActivityRepository;
+    @Autowired
+    private PlayerMatchParticipationRepository playerMatchParticipationRepository;
+    @Autowired
+    private StaffMatchParticipationRepository staffMatchParticipationRepository;
+    @Autowired
+    private RefereeMatchParticipationRepository refereeMatchParticipationRepository;
     private final ModelMapper modelMapper;
 
     public ResponseWithTotalPage<MatchResponse> getAllMatch(int pageNumber, int pageSize,UUID tournamentId,UUID stadiumId, UUID roundId){
@@ -63,7 +74,20 @@ public class MatchService {
                     MatchSpecification matchSpecification = new MatchSpecification(new SearchCriteria("round",SearchOperation.EQUALITY,round));
                     specificationListSpecial.add(matchSpecification);
                 }
+            }else{
+                ResponseWithTotalPage<MatchResponse> response = new ResponseWithTotalPage<>();
+                List<MatchResponse> matchList = new ArrayList<>();
+                response.setData(matchList);
+                PaginationResponse paginationResponse = PaginationResponse.builder()
+                        .pageIndex(pageNumber)
+                        .pageSize(pageSize)
+                        .totalCount(0)
+                        .totalPage(0)
+                        .build();
+                response.setPagination(paginationResponse);
+                return  response;
             }
+
         }
         if (stadiumId != null) {
             Stadium stadium = stadiumRepository.findById(stadiumId).orElseThrow(()-> new NotFoundException(StadiumFailMessage.STADIUM_NOT_FOUND));
@@ -120,7 +144,65 @@ public class MatchService {
 //    }
     public MatchResponse findMatchById(UUID matchId){
         Match match = matchRepository.findById(matchId).orElseThrow(()->new NotFoundException(MatchFailMessage.MATCH_NOT_FOUND));
-        return modelMapper.map(match,MatchResponse.class);
+        List<MatchActivity> matchActivityList = matchActivityRepository.findAllByMatch(match);
+        MatchResponse matchResponse = modelMapper.map(match,MatchResponse.class);
+        matchResponse.setActivities(matchActivityList);
+        return matchResponse;
+    }
+    public MatchParticipationResponse getMatchParticipationById(UUID matchId){
+        Match match = matchRepository.findById(matchId).orElseThrow(()->new NotFoundException(MatchFailMessage.MATCH_NOT_FOUND));
+        return modelMapper.map(match,MatchParticipationResponse.class);
+    }
+    public MatchActivityResponse addMatchActivity(UUID matchId,MatchActivityCreateDTO dto){
+        Match match = matchRepository.findById(matchId).orElseThrow(()->new NotFoundException(MatchFailMessage.MATCH_NOT_FOUND));
+        List<PlayerMatchParticipationKey> playerMatchParticipationKeyList = new ArrayList<>();
+        List<StaffMatchParticipationKey> staffMatchParticipationKeyList = new ArrayList<>();
+        List<RefereeMatchParticipationKey> refereeMatchParticipationKeyList = new ArrayList<>();
+        if(dto.getPlayerContractIds() != null && !dto.getPlayerContractIds().isEmpty()){
+            for (UUID playerContractId:dto.getPlayerContractIds()){
+                PlayerMatchParticipationKey playerMatchParticipationKey =PlayerMatchParticipationKey.builder()
+                        .matchId(matchId)
+                        .playerContractId(playerContractId)
+                        .build();
+                playerMatchParticipationKeyList.add(playerMatchParticipationKey);
+            }
+        }
+        List<PlayerMatchParticipation> playerMatchParticipationList = playerMatchParticipationRepository.findAllById(playerMatchParticipationKeyList);
+
+
+        if(dto.getStaffContractIds()!= null && !dto.getStaffContractIds().isEmpty()){
+            for (UUID staffContractId:dto.getStaffContractIds()){
+                StaffMatchParticipationKey staffMatchParticipationKey =StaffMatchParticipationKey.builder()
+                        .matchId(matchId)
+                        .staffContractId(staffContractId)
+                        .build();
+                staffMatchParticipationKeyList.add(staffMatchParticipationKey);
+            }
+        }
+        List<StaffMatchParticipation> staffMatchParticipationList = staffMatchParticipationRepository.findAllById(staffMatchParticipationKeyList);
+
+        if(dto.getRefereeIds()!= null && !dto.getRefereeIds().isEmpty()){
+            for (UUID refereeId:dto.getRefereeIds()){
+                RefereeMatchParticipationKey refereeMatchParticipationKey =RefereeMatchParticipationKey.builder()
+                        .matchId(matchId)
+                        .refereeId(refereeId)
+                        .build();
+                refereeMatchParticipationKeyList.add(refereeMatchParticipationKey);
+            }
+        }
+        List<RefereeMatchParticipation> refereeMatchParticipationList = refereeMatchParticipationRepository.findAllById(refereeMatchParticipationKeyList);
+
+
+        MatchActivity matchActivity = MatchActivity.builder()
+                .match(match)
+                .minuteInMatch(dto.getMinuteInMatch())
+                .type(ActivityType.lookup(dto.getType()))
+                .playerMatchParticipations(playerMatchParticipationList)
+                .refereeMatchParticipations(refereeMatchParticipationList)
+                .staffMatchParticipations(staffMatchParticipationList)
+                .build();
+        matchActivityRepository.save(matchActivity);
+        return modelMapper.map(matchActivity,MatchActivityResponse.class);
     }
     public String deleteMatchById(UUID matchId){
         boolean exist = matchRepository.existsById(matchId);

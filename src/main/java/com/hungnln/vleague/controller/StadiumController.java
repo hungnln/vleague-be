@@ -32,11 +32,11 @@ public class StadiumController {
     @GetMapping("")
     @Operation(summary ="Get stadiums list", description = "Get stadiums list")
     ResponseEntity<ResponseDTO<ResponseWithTotalPage<StadiumResponse>>> getAllStadiums(
-            @RequestParam(defaultValue = "0") int pageNumber,
+            @RequestParam(defaultValue = "0") int pageIndex,
             @RequestParam(defaultValue = "20") int pageSize
     ){
         ResponseDTO<ResponseWithTotalPage<StadiumResponse>> responseDTO = new ResponseDTO<>();
-        ResponseWithTotalPage<StadiumResponse> list = stadiumService.getAllStadiums(pageNumber, pageSize);
+        ResponseWithTotalPage<StadiumResponse> list = stadiumService.getAllStadiums(pageIndex, pageSize);
         responseDTO.setStatus(ResponseStatusDTO.SUCCESS);
         responseDTO.setData(list);
         responseDTO.setMessage(StadiumSuccessMessage.GET_ALL_SUCCESSFULL);

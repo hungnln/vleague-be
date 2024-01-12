@@ -26,9 +26,9 @@ public class Player implements Serializable {
     @Column(name = "dateofbirth")
     private Date dateOfBirth;
     @Column(name = "heightcm")
-    private float heightCm;
+    private int heightCm;
     @Column(name = "weightkg")
-    private float weightKg;
+    private int weightKg;
     @JsonIgnore
     @ManyToMany(mappedBy = "players")
     private Collection<News> news;
