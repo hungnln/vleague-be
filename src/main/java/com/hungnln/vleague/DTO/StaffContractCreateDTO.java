@@ -20,8 +20,9 @@ public class StaffContractCreateDTO {
 
     @NotNull(message = ValidationMessage.SALARY_VALID_MESSAGE)
     @Positive
-    private int salary;
-    
+    private float salary;
+
+    @NotEmpty(message = ValidationMessage.SALARY_VALID_MESSAGE)
     private String description;
 
     @NotNull(message = ValidationMessage.START_DATE_VALID_MESSAGE)
