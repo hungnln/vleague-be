@@ -43,6 +43,6 @@ public class OpenAPIConfig {
                 .description("This API exposes endpoints to manage vleague.").termsOfService("https://www.hungnln.com/terms")
                 .license(mitLicense);
 
-        return new OpenAPI().info(info).servers(List.of(devServer, prodServer));
+        return new OpenAPI().info(info).servers(List.of(prodServer));
     }
 }
