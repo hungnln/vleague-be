@@ -8,6 +8,7 @@ import com.hungnln.vleague.repository.PlayerRepository;
 import com.hungnln.vleague.response.ListResponseDTO;
 import com.hungnln.vleague.response.PlayerResponse;
 import com.hungnln.vleague.response.ResponseDTO;
+import com.hungnln.vleague.response.ResponseWithTotalPage;
 import com.hungnln.vleague.service.PlayerService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -20,9 +21,10 @@ import org.springframework.validation.BindException;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/v1.0/players")
+@RequestMapping("/api/v1/players")
 @Tag(name = "player", description = "player api")
 public class PlayerController {
     public static Logger logger = LoggerFactory.getLogger(PlayerController.class);
@@ -33,19 +35,19 @@ public class PlayerController {
 
     @GetMapping("")
     @Operation(summary ="Get players list", description = "Get players list")
-    ResponseEntity<ListResponseDTO> getAllPlayers(
+    ResponseEntity<ResponseDTO<ResponseWithTotalPage<PlayerResponse>>> getAllPlayers(
             @RequestParam(defaultValue = "0") int pageNo,
-            @RequestParam(defaultValue = "10") int pageSize
+            @RequestParam(defaultValue = "20") int pageSize
     ){
-        ListResponseDTO<PlayerResponse> responseDTO = new ListResponseDTO<>();
-        List<PlayerResponse> list = playerService.getAllPlayers(pageNo, pageSize);
+        ResponseDTO<ResponseWithTotalPage<PlayerResponse>> responseDTO = new ResponseDTO<>();
+        ResponseWithTotalPage<PlayerResponse> list = playerService.getAllPlayers(pageNo, pageSize);
         responseDTO.setStatus(ResponseStatusDTO.SUCCESS);
         responseDTO.setData(list);
         responseDTO.setMessage(PlayerSuccessMessage.GET_PLAYER_SUCCESSFULL);
         return ResponseEntity.ok().body(responseDTO);
     }
     @GetMapping("/{id}")
-    ResponseEntity<ResponseDTO> getPlayerById(@PathVariable String id){
+    ResponseEntity<ResponseDTO<PlayerResponse>> getPlayerById(@PathVariable UUID id){
         ResponseDTO<PlayerResponse> responseDTO = new ResponseDTO<>();
         PlayerResponse player = playerService.getPlayerById(id);
         responseDTO.setData(player);
@@ -54,7 +56,7 @@ public class PlayerController {
         return ResponseEntity.ok().body(responseDTO);
     }
     @PostMapping("")
-    ResponseEntity<ResponseDTO> addPlayer(@RequestBody @Valid PlayerCreateDTO dto) throws BindException {
+    ResponseEntity<ResponseDTO<PlayerResponse>> addPlayer(@RequestBody @Valid PlayerCreateDTO dto) throws BindException {
         ResponseDTO<PlayerResponse> responseDTO = new ResponseDTO<>();
         PlayerResponse player = playerService.addPlayer(dto);
         responseDTO.setData(player);
@@ -64,7 +66,7 @@ public class PlayerController {
     }
 
     @PutMapping("/{id}")
-    ResponseEntity<ResponseDTO> updatePlayer(@PathVariable String id, @RequestBody @Valid PlayerUpdateDTO dto) throws BindException{
+    ResponseEntity<ResponseDTO<PlayerResponse>> updatePlayer(@PathVariable UUID id, @RequestBody @Valid PlayerUpdateDTO dto) throws BindException{
         ResponseDTO<PlayerResponse> responseDTO = new ResponseDTO<>();
         PlayerResponse player = playerService.updatePlayer(id,dto);
         responseDTO.setData(player);
@@ -74,7 +76,7 @@ public class PlayerController {
 
     }
     @DeleteMapping("/{id}")
-    ResponseEntity<ResponseDTO> deletePlayer(@PathVariable String id){
+    ResponseEntity<ResponseDTO<PlayerResponse>> deletePlayer(@PathVariable UUID id){
         ResponseDTO<PlayerResponse> responseDTO = new ResponseDTO<>();
         String msg = playerService.deletePlayer(id);
         responseDTO.setMessage(msg);

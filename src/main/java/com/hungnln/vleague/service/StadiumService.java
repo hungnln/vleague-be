@@ -10,6 +10,8 @@ import com.hungnln.vleague.exceptions.ExistException;
 import com.hungnln.vleague.exceptions.ListEmptyException;
 import com.hungnln.vleague.exceptions.NotFoundException;
 import com.hungnln.vleague.repository.StadiumRepository;
+import com.hungnln.vleague.response.PaginationResponse;
+import com.hungnln.vleague.response.ResponseWithTotalPage;
 import com.hungnln.vleague.response.StadiumResponse;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -32,9 +34,10 @@ public class StadiumService {
     private StadiumRepository stadiumRepository;
     private final ModelMapper modelMapper;
 
-    public List<StadiumResponse> getAllStadiums(int pageNo, int pageSize){
-        Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by(Sort.Direction.ASC, "id"));
+    public ResponseWithTotalPage<StadiumResponse> getAllStadiums(int pageNumber, int pageSize){
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.ASC, "id"));
         Page<Stadium> pageResult = stadiumRepository.findAll(pageable);
+        ResponseWithTotalPage<StadiumResponse> response = new ResponseWithTotalPage<>();
         List<StadiumResponse> stadiumList = new ArrayList<>();
         if(pageResult.hasContent()) {
             for (Stadium stadium :
@@ -43,9 +46,16 @@ public class StadiumService {
                 stadiumList.add(stadiumResponse);
             }
 
-        }else
-            throw new ListEmptyException(StadiumFailMessage.LIST_STADIUM_IS_EMPTY);
-        return stadiumList;
+        }
+        response.setData(stadiumList);
+        PaginationResponse paginationResponse = PaginationResponse.builder()
+                .pageIndex(pageResult.getNumber())
+                .pageSize(pageResult.getSize())
+                .totalCount((int) pageResult.getTotalElements())
+                .totalPage(pageResult.getTotalPages())
+                .build();
+        response.setPagination(paginationResponse);
+        return response;
     }
 
     public StadiumResponse addStadium(StadiumCreateDTO stadiumCreateDTO) {

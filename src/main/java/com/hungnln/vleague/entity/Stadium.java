@@ -1,9 +1,11 @@
 package com.hungnln.vleague.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.UUID;
 @Entity
 @Getter
@@ -19,4 +21,9 @@ public class Stadium implements Serializable {
     private String name;
     private String address;
     private String imageURL;
+    @OneToMany(mappedBy = "stadium" ,cascade = CascadeType.ALL)
+//    @EqualsAndHashCode.Exclude
+//    @ToString.Exclude
+    @JsonIgnore
+    private Collection<Club> clubs;
 }

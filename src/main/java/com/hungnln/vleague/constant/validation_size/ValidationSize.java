@@ -11,5 +11,9 @@ public class ValidationSize {
     public static final int HEIGHTCM_MAX=300;
     public static final int WEIGHTKG_MIN=30;
     public static final int WEIGHTKG_MAX=200;
+    public static final int NUMBER_MIN=1;
+    public static final int NUMBER_MAX=1000;
+
+
 
 }

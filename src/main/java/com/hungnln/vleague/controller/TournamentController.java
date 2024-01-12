@@ -7,6 +7,7 @@ import com.hungnln.vleague.constant.tournament.TournamentSuccessMessage;
 import com.hungnln.vleague.repository.TournamentRepository;
 import com.hungnln.vleague.response.ListResponseDTO;
 import com.hungnln.vleague.response.ResponseDTO;
+import com.hungnln.vleague.response.ResponseWithTotalPage;
 import com.hungnln.vleague.response.TournamentResponse;
 import com.hungnln.vleague.service.TournamentService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -17,11 +18,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindException;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/v1.0/tournaments")
+@RequestMapping("/api/v1/tournaments")
 @Tag(name = "tournament", description = "tournament api")
 public class TournamentController {
     @Autowired
@@ -30,19 +32,22 @@ public class TournamentController {
     TournamentService tournamentService;
     @GetMapping("")
     @Operation(summary ="Get tournaments list", description = "Get tournaments list")
-    ResponseEntity<ListResponseDTO> getAllTournaments(
-            @RequestParam(defaultValue = "0") int pageNo,
-            @RequestParam(defaultValue = "10") int pageSize
-    ){
-        ListResponseDTO<TournamentResponse> responseDTO = new ListResponseDTO<>();
-        List<TournamentResponse> list = tournamentService.getAllTournaments(pageNo, pageSize);
+    ResponseEntity<ResponseDTO<ResponseWithTotalPage<TournamentResponse>>> getAllTournaments(
+            @RequestParam(defaultValue = "0") int pageIndex,
+            @RequestParam(defaultValue = "10") int pageSize,
+            @RequestParam(required = false) Date name,
+            @RequestParam(required = false) Date start,
+            @RequestParam(required = false) Date end
+            ){
+        ResponseDTO<ResponseWithTotalPage<TournamentResponse>> responseDTO = new ResponseDTO<>();
+        ResponseWithTotalPage<TournamentResponse> list = tournamentService.getAllTournaments(pageIndex, pageSize);
         responseDTO.setStatus(ResponseStatusDTO.SUCCESS);
         responseDTO.setData(list);
         responseDTO.setMessage(TournamentSuccessMessage.GET_ALL_SUCCESSFULL);
         return ResponseEntity.ok().body(responseDTO);
     }
     @GetMapping("/{id}")
-    ResponseEntity<ResponseDTO> getTournamentById(@PathVariable UUID id){
+    ResponseEntity<ResponseDTO<TournamentResponse>> getTournamentById(@PathVariable UUID id){
         ResponseDTO<TournamentResponse> responseDTO = new ResponseDTO<>();
         TournamentResponse tournament = tournamentService.getTournamentById(id);
         responseDTO.setData(tournament);
@@ -51,7 +56,7 @@ public class TournamentController {
         return ResponseEntity.ok().body(responseDTO);
     }
     @PostMapping("")
-    ResponseEntity<ResponseDTO> addTournament(@RequestBody @Valid TournamentCreateDTO dto) throws BindException {
+    ResponseEntity<ResponseDTO<TournamentResponse>> addTournament(@RequestBody @Valid TournamentCreateDTO dto) throws BindException {
         ResponseDTO<TournamentResponse> responseDTO = new ResponseDTO<>();
         TournamentResponse tournament = tournamentService.addTournament(dto);
         responseDTO.setData(tournament);
@@ -61,7 +66,7 @@ public class TournamentController {
     }
 
     @PutMapping("/{id}")
-    ResponseEntity<ResponseDTO> updateTournament(@PathVariable UUID id, @RequestBody @Valid TournamentUpdateDTO dto) throws BindException{
+    ResponseEntity<ResponseDTO<TournamentResponse>> updateTournament(@PathVariable UUID id, @RequestBody @Valid TournamentUpdateDTO dto) throws BindException{
         ResponseDTO<TournamentResponse> responseDTO = new ResponseDTO<>();
         TournamentResponse tournament = tournamentService.updateTournament(id,dto);
         responseDTO.setData(tournament);

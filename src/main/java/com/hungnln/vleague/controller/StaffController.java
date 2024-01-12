@@ -7,6 +7,7 @@ import com.hungnln.vleague.constant.staff.StaffSuccessMessage;
 import com.hungnln.vleague.repository.StaffRepository;
 import com.hungnln.vleague.response.ListResponseDTO;
 import com.hungnln.vleague.response.ResponseDTO;
+import com.hungnln.vleague.response.ResponseWithTotalPage;
 import com.hungnln.vleague.response.StaffResponse;
 import com.hungnln.vleague.service.StaffService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -21,7 +22,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/v1.0/staffs")
+@RequestMapping("/api/v1/staffs")
 @Tag(name = "staff", description = "staff api")
 public class StaffController {
     @Autowired
@@ -30,19 +31,19 @@ public class StaffController {
     StaffService staffService;
     @GetMapping("")
     @Operation(summary ="Get staffs list", description = "Get staffs list")
-    ResponseEntity<ListResponseDTO> getAllStaffs(
-            @RequestParam(defaultValue = "0") int pageNo,
+    ResponseEntity<ResponseDTO<ResponseWithTotalPage<StaffResponse>>> getAllStaffs(
+            @RequestParam(defaultValue = "0") int pageIndex,
             @RequestParam(defaultValue = "10") int pageSize
     ){
-        ListResponseDTO<StaffResponse> responseDTO = new ListResponseDTO<>();
-        List<StaffResponse> list = staffService.getAllStaffs(pageNo, pageSize);
+        ResponseDTO<ResponseWithTotalPage<StaffResponse>> responseDTO = new ResponseDTO<>();
+        ResponseWithTotalPage<StaffResponse> list = staffService.getAllStaffs(pageIndex, pageSize);
         responseDTO.setStatus(ResponseStatusDTO.SUCCESS);
         responseDTO.setData(list);
         responseDTO.setMessage(StaffSuccessMessage.GET_ALL_SUCCESSFULL);
         return ResponseEntity.ok().body(responseDTO);
     }
     @GetMapping("/{id}")
-    ResponseEntity<ResponseDTO> getStaffById(@PathVariable UUID id){
+    ResponseEntity<ResponseDTO<StaffResponse>> getStaffById(@PathVariable UUID id){
         ResponseDTO<StaffResponse> responseDTO = new ResponseDTO<>();
         StaffResponse staff = staffService.getStaffById(id);
         responseDTO.setData(staff);
@@ -51,7 +52,7 @@ public class StaffController {
         return ResponseEntity.ok().body(responseDTO);
     }
     @PostMapping("")
-    ResponseEntity<ResponseDTO> addStaff(@RequestBody @Valid StaffCreateDTO dto) throws BindException {
+    ResponseEntity<ResponseDTO<StaffResponse>> addStaff(@RequestBody @Valid StaffCreateDTO dto) throws BindException {
         ResponseDTO<StaffResponse> responseDTO = new ResponseDTO<>();
         StaffResponse staff = staffService.addStaff(dto);
         responseDTO.setData(staff);
@@ -61,7 +62,7 @@ public class StaffController {
     }
 
     @PutMapping("/{id}")
-    ResponseEntity<ResponseDTO> updateStaff(@PathVariable UUID id, @RequestBody @Valid StaffUpdateDTO dto) throws BindException{
+    ResponseEntity<ResponseDTO<StaffResponse>> updateStaff(@PathVariable UUID id, @RequestBody @Valid StaffUpdateDTO dto) throws BindException{
         ResponseDTO<StaffResponse> responseDTO = new ResponseDTO<>();
         StaffResponse staff = staffService.updateStaff(id,dto);
         responseDTO.setData(staff);
